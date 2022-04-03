@@ -1,5 +1,5 @@
 # DY2BIT_Server
-<img width="1054" alt="image" src="https://user-images.githubusercontent.com/39155520/161428278-4594233d-dc60-4d55-84db-ba2a5a46a96e.png">
+<img width="1053" alt="image" src="https://user-images.githubusercontent.com/39155520/161435580-13a2b7e5-e790-47ba-a932-5a288fddb386.png">
 
 트레이딩 알고리즘 한달 수동 테스트
 - 2월19일 2020만원
