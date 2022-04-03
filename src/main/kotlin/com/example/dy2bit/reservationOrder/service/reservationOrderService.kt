@@ -11,7 +11,7 @@ import java.time.Instant
 
 @Service
 class ReservationOrderService(
-        private val reservationOrderRepository: ReservationOrderRepository,
+    private val reservationOrderRepository: ReservationOrderRepository,
 ) {
 
     @Transactional
@@ -32,8 +32,9 @@ class ReservationOrderService(
         val targetSellReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, false)
         if (targetBuyReservation.isNotEmpty()) {
             targetBuyReservation.map { reservationOrder ->
-              //  isPossibleTrade()
-                tradeReservationOrder(reservationOrder, true) }
+                //  isPossibleTrade()
+                tradeReservationOrder(reservationOrder, true)
+            }
         }
         if (targetSellReservation.isNotEmpty()) {
             // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
@@ -70,17 +71,14 @@ class ReservationOrderService(
 
     // TODO: 업비트로 코인 매수, 매도 주문 요청 로직
     private fun tradeUpbit(position: Boolean, quantity: Float) {
-
     }
 
     // TODO: 바이낸스로 코인 매수, 매도 주문 요청 로직
     private fun tradeBinance(position: Boolean, quantity: Float) {
-
     }
 
     private fun completedTrade(reservationOrder: ReservationOrder): ReservationOrder {
         reservationOrder.endAt = Instant.now()
         return reservationOrderRepository.saveAndFlush(reservationOrder)
     }
-
 }

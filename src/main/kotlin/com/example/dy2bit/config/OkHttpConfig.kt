@@ -12,13 +12,13 @@ class OkHttpConfig {
     fun okHttpClient(): OkHttpClient {
 
         return OkHttpClient()
-                .newBuilder().apply {
-                    // 서버 연결을 최대 10초 수행
-                    connectTimeout(10, TimeUnit.SECONDS)
-                    // 서버 요청을 최대 10초 수행
-                    writeTimeout(10, TimeUnit.SECONDS)
-                    // 서버 응답을 최대 10초 기다림
-                    readTimeout(10, TimeUnit.SECONDS)
-                }.build()
+            .newBuilder().apply {
+                // 서버 연결을 최대 10초 수행
+                connectTimeout(10, TimeUnit.SECONDS)
+                // 서버 요청을 최대 10초 수행
+                writeTimeout(10, TimeUnit.SECONDS)
+                // 서버 응답을 최대 10초 기다림
+                readTimeout(10, TimeUnit.SECONDS)
+            }.build()
     }
 }

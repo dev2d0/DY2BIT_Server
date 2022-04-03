@@ -16,12 +16,11 @@ import okhttp3.Request
 import org.springframework.stereotype.Service
 import java.time.*
 
-
 @Service
 class TrackerService(
-        private val reservationOrderService: ReservationOrderService,
-        private val trackerRepository: TrackerRepository,
-        private val okHttpClient: OkHttpClient,
+    private val reservationOrderService: ReservationOrderService,
+    private val trackerRepository: TrackerRepository,
+    private val okHttpClient: OkHttpClient,
 ) {
     suspend fun trackerEveryJob() = runBlocking {
         val kimpPer = async { getKimpPer() }.await()
@@ -58,18 +57,18 @@ class TrackerService(
         val exchangeRatePrice = getExchangeRatePrice.await().basePrice
 
         // 김프 퍼센트 = (업비트 가격/(바이낸스 가격*환율)-1)*100
-        val kimpPer = (upbitPrice/(binancePrice*exchangeRatePrice)-1)*100
+        val kimpPer = (upbitPrice / (binancePrice * exchangeRatePrice) - 1) * 100
         return@runBlocking kimpPer
     }
 
     // TODO: 코인 가격 가져오는 함수들의 url은 전역으로 빼고 symbol 값 넣을 수 있도록 하기
     private fun getUpbitCurrentBitPrice(): UpbitPriceDTO {
         val httpResponse = okHttpClient.newCall(
-                Request.Builder()
-                        .url("https://api.upbit.com/v1/candles/minutes/1?market=KRW-BTC&count=1")
-                        .addHeader("Accept", "application/json")
-                        .get()
-                        .build()
+            Request.Builder()
+                .url("https://api.upbit.com/v1/candles/minutes/1?market=KRW-BTC&count=1")
+                .addHeader("Accept", "application/json")
+                .get()
+                .build()
         ).execute().body
         val jsonArray: JsonArray = JsonParser().parse(httpResponse?.string()) as JsonArray
         val response = jsonArray.get(0)
@@ -79,25 +78,25 @@ class TrackerService(
 
     private fun getBinanceCurrentBitPrice(): BinancePriceDTO {
         val httpResponse = okHttpClient.newCall(
-                Request.Builder()
-                        // 선물: https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT
-                        // 현물: https://api.binance.com/api/v1/ticker/price?symbol=BTCUSDT
-                        .url("https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT")
-                        .addHeader("Accept", "application/json")
-                        .get()
-                        .build()
+            Request.Builder()
+                // 선물: https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT
+                // 현물: https://api.binance.com/api/v1/ticker/price?symbol=BTCUSDT
+                .url("https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT")
+                .addHeader("Accept", "application/json")
+                .get()
+                .build()
         ).execute().body
 
-       return Gson().fromJson(httpResponse?.string(), BinancePriceDTO::class.java)
+        return Gson().fromJson(httpResponse?.string(), BinancePriceDTO::class.java)
     }
 
     private fun getExchangeRatePrice(): ExchangeRatePriceDTO {
         val httpResponse = okHttpClient.newCall(
-                Request.Builder()
-                        .url("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD")
-                        .addHeader("Accept", "application/json")
-                        .get()
-                        .build()
+            Request.Builder()
+                .url("https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD")
+                .addHeader("Accept", "application/json")
+                .get()
+                .build()
         ).execute().body
         val jsonArray: JsonArray = JsonParser().parse(httpResponse?.string()) as JsonArray
         val response = jsonArray.get(0)

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class TrackerController(
-        private val trackerService: TrackerService,
+    private val trackerService: TrackerService,
 ) {
     @GetMapping("/api/getUpbitCurrentBitPrice")
     suspend fun getCurrentBitPrice() {

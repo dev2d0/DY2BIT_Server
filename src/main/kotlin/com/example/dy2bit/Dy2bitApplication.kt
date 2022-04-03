@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class Dy2bitApplication
 
 fun main(args: Array<String>) {
-	runApplication<Dy2bitApplication>(*args)
+    runApplication<Dy2bitApplication>(*args)
 }
