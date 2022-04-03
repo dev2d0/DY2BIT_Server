@@ -1,8 +1,11 @@
 package com.example.dy2bit.tracker.service
 
+import com.example.dy2bit.model.Tracker
 import com.example.dy2bit.model.dto.BinancePriceDTO
 import com.example.dy2bit.model.dto.ExchangeRatePriceDTO
 import com.example.dy2bit.model.dto.UpbitPriceDTO
+import com.example.dy2bit.repository.TrackerRepository
+import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
@@ -11,14 +14,41 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.springframework.stereotype.Service
+import java.time.*
 
 
 @Service
 class TrackerService(
+        private val reservationOrderService: ReservationOrderService,
+        private val trackerRepository: TrackerRepository,
         private val okHttpClient: OkHttpClient,
 ) {
+    suspend fun trackerEveryJob() = runBlocking {
+        val kimpPer = async { getKimpPer() }.await()
+        async {
+            reservationOrderService.tradeReservationOrder(kimpPer)
+            updateTodayKimpMinMaxRate(kimpPer)
+        }
+    }.await()
 
-    suspend fun updateMinMaxGimpPrice() = runBlocking {
+    private fun updateTodayKimpMinMaxRate(kimpPer: Float): Tracker? {
+        val startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0)).atZone(ZoneId.of("Asia/Seoul")).toInstant() //오늘 00:00:00
+        val endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59)).atZone(ZoneId.of("Asia/Seoul")).toInstant() //오늘 23:59:59
+
+        val target = trackerRepository.findByMaxRateGreaterThanOrMinRateLessThanAndCreatedAtLessThanAndCreatedAtGreaterThan(kimpPer, startDatetime, endDatetime)
+        return if (target != null) {
+            if (target.maxRate < kimpPer) {
+                target.maxRate = kimpPer
+                target.maxRateAt = Instant.now()
+            } else if (target.minRate > kimpPer) {
+                target.minRate = kimpPer
+                target.minRateAt = Instant.now()
+            }
+            trackerRepository.save(target)
+        } else null
+    }
+
+    private fun getKimpPer(): Float = runBlocking {
         val getUpbitPrice = async { getUpbitCurrentBitPrice() }
         val getBinancePrice = async { getBinanceCurrentBitPrice() }
         val getExchangeRatePrice = async { getExchangeRatePrice() }
@@ -28,8 +58,8 @@ class TrackerService(
         val exchangeRatePrice = getExchangeRatePrice.await().basePrice
 
         // 김프 퍼센트 = (업비트 가격/(바이낸스 가격*환율)-1)*100
-        val gimpPer = (upbitPrice/(binancePrice*exchangeRatePrice)-1)*100
-        println(gimpPer)
+        val kimpPer = (upbitPrice/(binancePrice*exchangeRatePrice)-1)*100
+        return@runBlocking kimpPer
     }
 
     // TODO: 코인 가격 가져오는 함수들의 url은 전역으로 빼고 symbol 값 넣을 수 있도록 하기
