@@ -1,5 +1,5 @@
 # DY2BIT_Server
-<img width="1054" alt="image" src="https://user-images.githubusercontent.com/39155520/161428278-4594233d-dc60-4d55-84db-ba2a5a46a96e.png">
+<img width="1053" alt="image" src="https://user-images.githubusercontent.com/39155520/161435580-13a2b7e5-e790-47ba-a932-5a288fddb386.png">
 
 트레이딩 알고리즘 한달 수동 테스트
 - 2월19일 2020만원
@@ -41,6 +41,7 @@
 - 프론트엔드와 연결해서 예약 가격 설정하고 DB에 저장하기
 - 업비트, 바이낸스 매수 매도 api 연결, 계좌 연동
 - 매매 전 잔고 수량 확인 후 매매 가능 여부 로직 추가
+- 관련 로직 테스트 코드 작성
 
 <hr>
 
