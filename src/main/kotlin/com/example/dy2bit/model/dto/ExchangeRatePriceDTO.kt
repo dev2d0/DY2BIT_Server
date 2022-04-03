@@ -1,5 +1,5 @@
 package com.example.dy2bit.model.dto
 
-data class ExhangeRatePriceDTO(
+data class ExchangeRatePriceDTO(
         val basePrice: Float,
 )
