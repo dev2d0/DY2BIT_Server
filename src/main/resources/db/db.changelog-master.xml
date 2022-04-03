@@ -6,4 +6,5 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
 
     <include file="001-create-reservation-order-table.xml" relativeToChangelogFile="true" />
+    <include file="002-create-tracker-table.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

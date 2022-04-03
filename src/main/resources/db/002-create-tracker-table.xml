@@ -4,34 +4,34 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-    <changeSet id="001" author="dev2d0">
-        <createTable tableName="reservation_order">
+    <changeSet id="002" author="dev2d0">
+        <createTable tableName="tracker">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="coin_name" type="VARCHAR(32)">
                 <constraints nullable="false"/>
             </column>
-            <column name="quantity" type="FLOAT">
+            <column name="min_rate" type="FLOAT">
                 <constraints nullable="false"/>
             </column>
-            <column name="target_kimp_rate" type="FLOAT">
+            <column name="max_rate" type="FLOAT">
                 <constraints nullable="false"/>
             </column>
-            <column name="position" type="BOOLEAN">
+            <column name="min_rate_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_rate_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="end_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
         </createTable>
-        <createIndex tableName="reservation_order" indexName="idx_reservation_order_1" unique="true">
+        <createIndex tableName="tracker" indexName="idx_tracker_1" unique="true">
             <column name="id"/>
         </createIndex>
-        <createIndex tableName="reservation_order" indexName="idx_reservation_order_2" unique="false">
+        <createIndex tableName="tracker" indexName="idx_tracker_2" unique="false">
             <column name="created_at"/>
             <column name="id"/>
         </createIndex>
