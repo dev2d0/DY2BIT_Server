@@ -4,7 +4,6 @@ import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -22,9 +21,9 @@ class ReservationOrderService(
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     fun cancelReservationOrder(id: Long): ReservationOrder {
-        val cancelReservation = reservationOrderRepository.findByIdOrNull(id)
-        cancelReservation?.endAt = Instant.now()
-        return reservationOrderRepository.save(cancelReservation!!)
+        val cancelReservation = reservationOrderRepository.findById(id).get()
+        cancelReservation.endAt = Instant.now()
+        return reservationOrderRepository.save(cancelReservation)
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -32,23 +31,41 @@ class ReservationOrderService(
         val targetBuyReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, true)
         val targetSellReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, false)
         if (targetBuyReservation.isNotEmpty()) {
-            // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
-            targetBuyReservation.map {
-                async {
-                    tradeUpbit(true, it.quantity)
-                    tradeBinance(false, it.quantity)
-                }.await()
-            }
+            targetBuyReservation.map { reservationOrder ->
+              //  isPossibleTrade()
+                tradeReservationOrder(reservationOrder, true) }
         }
         if (targetSellReservation.isNotEmpty()) {
             // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
-            targetBuyReservation.map {
-                async {
-                    tradeUpbit(false, it.quantity)
-                    tradeBinance(true, it.quantity)
-                }.await()
-            }
+            targetBuyReservation.map { tradeReservationOrder(it, false) }
         }
+    }
+
+    // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
+    private fun isPossibleTrade(): Boolean = runBlocking {
+        // 잔고의 10프로는 여분으로 둠
+        // 업비트와 바이낸스 각각 계좌에서 10프로를 뺀 가격에서 주문 수량 * 가격이 잔여액을 넘는가 체크
+        val isUpbitPossible = async { getUpbitAccountAndCheckTradePossible() }
+        val isBinancePossible = async { getBinanceAccountAndCheckTradePossible() }
+        return@runBlocking isUpbitPossible.await() && isBinancePossible.await()
+    }
+
+    // TODO: 업비트 계좌 조회 & 주문 가능 여부
+    private fun getUpbitAccountAndCheckTradePossible(): Boolean {
+        return true
+    }
+
+    // TODO: 바이낸스 계좌 조회 & 주문 가능 여부
+    private fun getBinanceAccountAndCheckTradePossible(): Boolean {
+        return true
+    }
+
+    private fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean) = runBlocking {
+        async {
+            tradeUpbit(isBuy, reservationOrder.quantity)
+            tradeBinance(!isBuy, reservationOrder.quantity)
+        }.await()
+        completedTrade(reservationOrder)
     }
 
     // TODO: 업비트로 코인 매수, 매도 주문 요청 로직
@@ -59,6 +76,11 @@ class ReservationOrderService(
     // TODO: 바이낸스로 코인 매수, 매도 주문 요청 로직
     private fun tradeBinance(position: Boolean, quantity: Float) {
 
+    }
+
+    private fun completedTrade(reservationOrder: ReservationOrder): ReservationOrder {
+        reservationOrder.endAt = Instant.now()
+        return reservationOrderRepository.saveAndFlush(reservationOrder)
     }
 
 }
