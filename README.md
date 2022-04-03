@@ -1,4 +1,5 @@
 # DY2BIT_Server
+<img width="1046" alt="image" src="https://user-images.githubusercontent.com/39155520/161426847-65788289-b6ed-4b22-8a20-da4bb7a1531a.png">
 
 ## 기획 스펙
 - 업비트, 바이낸스, 환율 api를 3~5초 주기로 가격을 받아와 김프가를 계산합니다.
