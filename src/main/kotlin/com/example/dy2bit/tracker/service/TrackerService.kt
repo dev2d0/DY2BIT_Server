@@ -10,7 +10,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.springframework.stereotype.Service
@@ -22,7 +22,7 @@ class TrackerService(
     private val trackerRepository: TrackerRepository,
     private val okHttpClient: OkHttpClient,
 ) {
-    suspend fun trackerEveryJob() = runBlocking {
+    suspend fun trackerEveryJob() = coroutineScope {
         val kimpPer = async { getKimpPer() }.await()
         async {
             reservationOrderService.tradeReservationOrder(kimpPer)
@@ -47,7 +47,7 @@ class TrackerService(
         } else null
     }
 
-    private fun getKimpPer(): Float = runBlocking {
+    private suspend fun getKimpPer(): Float = coroutineScope {
         val getUpbitPrice = async { getUpbitCurrentBitPrice() }
         val getBinancePrice = async { getBinanceCurrentBitPrice() }
         val getExchangeRatePrice = async { getExchangeRatePrice() }
@@ -58,7 +58,7 @@ class TrackerService(
 
         // 김프 퍼센트 = (업비트 가격/(바이낸스 가격*환율)-1)*100
         val kimpPer = (upbitPrice / (binancePrice * exchangeRatePrice) - 1) * 100
-        return@runBlocking kimpPer
+        return@coroutineScope kimpPer
     }
 
     // TODO: 코인 가격 가져오는 함수들의 url은 전역으로 빼고 symbol 값 넣을 수 있도록 하기

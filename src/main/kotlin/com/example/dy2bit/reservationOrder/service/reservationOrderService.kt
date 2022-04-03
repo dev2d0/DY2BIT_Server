@@ -3,7 +3,7 @@ package com.example.dy2bit.reservationOrder.service
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
 import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -27,7 +27,7 @@ class ReservationOrderService(
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    suspend fun tradeReservationOrder(kimpPer: Float) = runBlocking {
+    suspend fun tradeReservationOrder(kimpPer: Float) = coroutineScope {
         val targetBuyReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, true)
         val targetSellReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, false)
         if (targetBuyReservation.isNotEmpty()) {
@@ -43,12 +43,12 @@ class ReservationOrderService(
     }
 
     // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
-    private fun isPossibleTrade(): Boolean = runBlocking {
+    private suspend fun isPossibleTrade(): Boolean = coroutineScope {
         // 잔고의 10프로는 여분으로 둠
         // 업비트와 바이낸스 각각 계좌에서 10프로를 뺀 가격에서 주문 수량 * 가격이 잔여액을 넘는가 체크
         val isUpbitPossible = async { getUpbitAccountAndCheckTradePossible() }
         val isBinancePossible = async { getBinanceAccountAndCheckTradePossible() }
-        return@runBlocking isUpbitPossible.await() && isBinancePossible.await()
+        return@coroutineScope isUpbitPossible.await() && isBinancePossible.await()
     }
 
     // TODO: 업비트 계좌 조회 & 주문 가능 여부
@@ -61,7 +61,7 @@ class ReservationOrderService(
         return true
     }
 
-    private fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean) = runBlocking {
+    private suspend fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean) = coroutineScope {
         async {
             tradeUpbit(isBuy, reservationOrder.quantity)
             tradeBinance(!isBuy, reservationOrder.quantity)
