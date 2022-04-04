@@ -31,6 +31,7 @@ dependencies {
 	implementation("org.liquibase:liquibase-core")
 	implementation("com.squareup.okhttp3:okhttp:4.9.1")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
+    testImplementation ("org.awaitility:awaitility:3.1.2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
