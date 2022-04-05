@@ -2,7 +2,6 @@ package com.example.dy2bit.tracker.controller
 
 import com.example.dy2bit.tracker.service.TrackerService
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -18,5 +17,4 @@ class TrackerController(
         trackerService.trackerEveryJob()
         logger.info("trackerEveryJob ended")
     }
-
 }
