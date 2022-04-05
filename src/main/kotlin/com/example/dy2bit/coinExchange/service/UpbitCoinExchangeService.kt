@@ -2,6 +2,7 @@ package com.example.dy2bit.coinExchange.service
 
 import com.example.dy2bit.model.dto.UpbitPriceDTO
 import com.example.dy2bit.coinExchange.model.CoinExchangeService
+import com.example.dy2bit.coinExchange.model.dto.CoinPriceDTO
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
@@ -15,7 +16,7 @@ class UpbitCoinExchangeService(
 ) : CoinExchangeService {
     override val coinExchangeApi = "https://api.upbit.com/v1/candles/minutes/1?market=KRW-BTC&count=1"
 
-    override fun getCurrentBitPrice(): UpbitPriceDTO {
+    override fun getCurrentBitPrice(): CoinPriceDTO {
         val httpResponse = okHttpClient.newCall(
             Request.Builder()
                 .url(coinExchangeApi)
@@ -26,7 +27,7 @@ class UpbitCoinExchangeService(
         val jsonArray: JsonArray = JsonParser().parse(httpResponse?.string()) as JsonArray
         val response = jsonArray.get(0)
 
-        return Gson().fromJson(response, UpbitPriceDTO::class.java)
+        return CoinPriceDTO(Gson().fromJson(response, UpbitPriceDTO::class.java))
     }
 
     // TODO: 업비트 계좌 조회 & 주문 가능 여부

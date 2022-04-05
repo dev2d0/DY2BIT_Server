@@ -1,7 +1,7 @@
 package com.example.dy2bit.tracker.service
 
-import com.example.dy2bit.coinExchange.service.UpbitCoinExchangeService
-import com.example.dy2bit.coinExchange.service.BinanceCoinExchangeService
+import com.example.dy2bit.coinExchange.model.CoinExchangeServiceFactory
+import com.example.dy2bit.coinExchange.model.type.CoinExchangeType
 import com.example.dy2bit.coinExchange.service.ExchagneRateService
 import com.example.dy2bit.model.Tracker
 import com.example.dy2bit.repository.TrackerRepository
@@ -14,8 +14,7 @@ import java.time.*
 @Service
 class TrackerService(
     private val reservationOrderService: ReservationOrderService,
-    private val upbitCoinExchangeService: UpbitCoinExchangeService,
-    private val binanceCoinExchangeService: BinanceCoinExchangeService,
+    private val coinExchangeServiceFactory: CoinExchangeServiceFactory,
     private val exchangeService: ExchagneRateService,
     private val trackerRepository: TrackerRepository,
 ) {
@@ -45,12 +44,12 @@ class TrackerService(
     }
 
     private suspend fun getKimpPer(): Float = coroutineScope {
-        val getUpbitPrice = async { upbitCoinExchangeService.getCurrentBitPrice() }
-        val getBinancePrice = async { binanceCoinExchangeService.getCurrentBitPrice() }
+        val getUpbitPrice = async { coinExchangeServiceFactory.coinExchangeServiceFactory(CoinExchangeType.UPBIT).getCurrentBitPrice() }
+        val getBinancePrice = async { coinExchangeServiceFactory.coinExchangeServiceFactory(CoinExchangeType.BINANCE).getCurrentBitPrice() }
         val getExchangeRatePrice = async { exchangeService.getExchangeRatePrice() }
 
-        val upbitPrice = getUpbitPrice.await().opening_price.toInt()
-        val binancePrice = getBinancePrice.await().price.toFloat()
+        val upbitPrice = getUpbitPrice.await().price
+        val binancePrice = getBinancePrice.await().price
         val exchangeRatePrice = getExchangeRatePrice.await().basePrice
 
         // 김프 퍼센트 = (업비트 가격/(바이낸스 가격*환율)-1)*100

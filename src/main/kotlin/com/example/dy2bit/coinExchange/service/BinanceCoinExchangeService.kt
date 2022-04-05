@@ -2,6 +2,7 @@ package com.example.dy2bit.coinExchange.service
 
 import com.example.dy2bit.model.dto.BinancePriceDTO
 import com.example.dy2bit.coinExchange.model.CoinExchangeService
+import com.example.dy2bit.coinExchange.model.dto.CoinPriceDTO
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
@@ -17,7 +18,7 @@ class BinanceCoinExchangeService(
     // 현물: https://api.binance.com/api/v1/ticker/price?symbol=BTCUSDT
     override val coinExchangeApi = "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT"
 
-    override fun getCurrentBitPrice(): BinancePriceDTO {
+    override fun getCurrentBitPrice(): CoinPriceDTO {
         val httpResponse = okHttpClient.newCall(
             Request.Builder()
                 .url(coinExchangeApi)
@@ -28,7 +29,7 @@ class BinanceCoinExchangeService(
         val jsonArray: JsonArray = JsonParser().parse(httpResponse?.string()) as JsonArray
         val response = jsonArray.get(0)
 
-        return Gson().fromJson(response, BinancePriceDTO::class.java)
+        return CoinPriceDTO(Gson().fromJson(response, BinancePriceDTO::class.java))
     }
 
     // TODO: 바이낸스 계좌 조회 & 주문 가능 여부
