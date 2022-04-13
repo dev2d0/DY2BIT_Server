@@ -2,20 +2,24 @@ package com.example.dy2bit.tracker.service
 
 import com.example.dy2bit.coinExchange.model.CoinExchangeServiceFactory
 import com.example.dy2bit.coinExchange.model.type.CoinExchangeType
-import com.example.dy2bit.coinExchange.service.ExchagneRateService
+import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.model.Tracker
 import com.example.dy2bit.repository.TrackerRepository
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
-import java.time.*
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 @Service
 class TrackerService(
     private val reservationOrderService: ReservationOrderService,
     private val coinExchangeServiceFactory: CoinExchangeServiceFactory,
-    private val exchangeService: ExchagneRateService,
+    private val exchangeRateService: ExchangeRateService,
     private val trackerRepository: TrackerRepository,
 ) {
     fun createTodayKimp() {
@@ -59,7 +63,7 @@ class TrackerService(
     suspend fun getKimpPer(): Float = coroutineScope {
         val getUpbitPrice = async { coinExchangeServiceFactory.coinExchangeServiceFactory(CoinExchangeType.UPBIT).getCurrentBitPrice() }
         val getBinancePrice = async { coinExchangeServiceFactory.coinExchangeServiceFactory(CoinExchangeType.BINANCE).getCurrentBitPrice() }
-        val getExchangeRatePrice = async { exchangeService.getExchangeRatePrice() }
+        val getExchangeRatePrice = async { exchangeRateService.getExchangeRatePrice() }
 
         val upbitPrice = getUpbitPrice.await().price
         val binancePrice = getBinancePrice.await().price
