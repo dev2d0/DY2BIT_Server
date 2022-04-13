@@ -21,13 +21,15 @@ class ReservationOrderService(
 
     @Transactional
     fun createReservationOrder(coinName: String, quantity: Float, targetKimpRate: Float, position: Boolean): ReservationOrder {
-        return reservationOrderRepository.saveAndFlush(ReservationOrder(
-            coinName = coinName,
-            quantity = quantity,
-            targetKimpRate = targetKimpRate,
-            position = position,
-            createdAt = Instant.now()
-        ))
+        return reservationOrderRepository.saveAndFlush(
+            ReservationOrder(
+                coinName = coinName,
+                quantity = quantity,
+                targetKimpRate = targetKimpRate,
+                position = position,
+                createdAt = Instant.now()
+            )
+        )
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

@@ -18,6 +18,19 @@ class TrackerService(
     private val exchangeService: ExchagneRateService,
     private val trackerRepository: TrackerRepository,
 ) {
+    fun createTodayKimp() {
+        trackerRepository.saveAndFlush(
+            Tracker(
+                coinName = "BTC",
+                minRate = 100F,
+                maxRate = -100F,
+                minRateAt = Instant.now(),
+                maxRateAt = Instant.now(),
+                createdAt = Instant.now(),
+            )
+        )
+    }
+
     suspend fun trackerEveryJob() = coroutineScope {
         val kimpPer = async { getKimpPer() }.await()
         async {

@@ -11,7 +11,7 @@ import javax.persistence.Id
 class Tracker(
     @get:Id
     @get:GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
+    var id: Long? = null,
 
     @get:Column(nullable = false)
     var coinName: String,
@@ -19,15 +19,15 @@ class Tracker(
     @get:Column(nullable = false)
     var minRate: Float,
 
-    @get:Column(nullable = true)
+    @get:Column(nullable = false)
     var maxRate: Float,
 
     @get:Column(nullable = false)
     var minRateAt: Instant,
 
-    @get:Column(nullable = true)
+    @get:Column(nullable = false)
     var maxRateAt: Instant,
 
-    @get:Column(nullable = true)
+    @get:Column(nullable = false)
     var createdAt: Instant
 )

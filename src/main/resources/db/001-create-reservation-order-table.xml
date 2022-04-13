@@ -25,7 +25,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="end_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </createTable>
         <createIndex tableName="reservation_order" indexName="idx_reservation_order_1" unique="true">

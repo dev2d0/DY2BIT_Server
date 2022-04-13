@@ -23,12 +23,14 @@ class ReservationOrderController(
 
     @PostMapping("/api/reservationOrders/createReservationOrder")
     fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
-        return UserReservationOrderListDTO(reservationOrderService.createReservationOrder(
-            createReservationOrderForm.coinName,
-            createReservationOrderForm.quantity,
-            createReservationOrderForm.targetKimpRate,
-            createReservationOrderForm.position,
-        ))
+        return UserReservationOrderListDTO(
+            reservationOrderService.createReservationOrder(
+                createReservationOrderForm.coinName,
+                createReservationOrderForm.quantity,
+                createReservationOrderForm.targetKimpRate,
+                createReservationOrderForm.position,
+            )
+        )
     }
 
     @PostMapping("/api/reservationOrders/{id}/cancelReservationOrder")
