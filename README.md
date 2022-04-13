@@ -1,5 +1,5 @@
 # DY2BIT_Server
-<img width="1000" alt="image" src="https://user-images.githubusercontent.com/39155520/161814370-3840690f-0ba1-4745-bfb4-e75f436ed68e.png">
+<img width="1200" alt="image" src="https://user-images.githubusercontent.com/39155520/161865502-135df50a-6918-4fe2-aefd-0244a5e7211a.png">
 
 트레이딩 알고리즘 한달 수동 테스트
 - 2월19일 2020만원
@@ -69,3 +69,4 @@
 매수 시세 계산 로직: 종목별로 평균단가 구하기 = {(물량1 * 가격1) + (물량2 * 가격2)+...+(물량n * 가격n)}/ 물량1+물량2+..+물량n
 청산가격: 평균단가 - (100/레버리지 배수 * 평균단가)
 평균 김프 = {(물량1 * 김프1) + (물량2 * 김프2)+...+(물량n * 김프n)}/ 물량1+물량2+..+물량n
+
