@@ -19,6 +19,17 @@ class ReservationOrderService(
         return reservationOrderRepository.findByEndAtNotNull()
     }
 
+    @Transactional
+    fun createReservationOrder(coinName: String, quantity: Float, targetKimpRate: Float, position: Boolean): ReservationOrder {
+        return reservationOrderRepository.saveAndFlush(ReservationOrder(
+            coinName = coinName,
+            quantity = quantity,
+            targetKimpRate = targetKimpRate,
+            position = position,
+            createdAt = Instant.now()
+        ))
+    }
+
     @Transactional(isolation = Isolation.SERIALIZABLE)
     fun cancelReservationOrder(id: Long): ReservationOrder {
         val cancelReservation = reservationOrderRepository.findById(id).get()

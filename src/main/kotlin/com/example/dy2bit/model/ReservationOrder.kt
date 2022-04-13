@@ -11,7 +11,7 @@ import javax.persistence.Id
 class ReservationOrder(
     @get:Id
     @get:GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
+    var id: Long? = null,
 
     @get:Column(nullable = false)
     var coinName: String,
@@ -30,5 +30,5 @@ class ReservationOrder(
     var createdAt: Instant,
 
     @get:Column(nullable = true)
-    var endAt: Instant?
+    var endAt: Instant? = null
 )
