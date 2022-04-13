@@ -18,6 +18,12 @@
             <column name="target_kimp_rate" type="FLOAT">
                 <constraints nullable="false"/>
             </column>
+            <column name="cur_kimp" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="cur_exchange_rate_price" type="FLOAT">
+                <constraints nullable="false"/>
+            </column>
             <column name="position" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>

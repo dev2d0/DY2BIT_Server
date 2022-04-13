@@ -9,7 +9,7 @@ import okhttp3.Request
 import org.springframework.stereotype.Service
 
 @Service
-class ExchagneRateService(
+class ExchangeRateService(
     private val okHttpClient: OkHttpClient,
 ) {
     val exchangeRateApi = "https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD"

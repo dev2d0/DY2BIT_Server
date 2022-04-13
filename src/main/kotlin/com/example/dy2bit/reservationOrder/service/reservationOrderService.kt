@@ -1,7 +1,9 @@
 package com.example.dy2bit.reservationOrder.service
 
+import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
+import com.example.dy2bit.tracker.service.TrackerService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
@@ -12,6 +14,8 @@ import java.time.Instant
 @Service
 class ReservationOrderService(
     private val reservationOrderRepository: ReservationOrderRepository,
+    private val trackerService: TrackerService,
+    private val exchangeRateService: ExchangeRateService,
 ) {
 
     @Transactional
@@ -20,12 +24,16 @@ class ReservationOrderService(
     }
 
     @Transactional
-    fun createReservationOrder(coinName: String, quantity: Float, targetKimpRate: Float, position: Boolean): ReservationOrder {
+    suspend fun createReservationOrder(coinName: String, quantity: Float, targetKimpRate: Float, position: Boolean): ReservationOrder {
+        val kimp = trackerService.getKimpPer()
+        val exchangeRatePrice = exchangeRateService.getExchangeRatePrice().basePrice
         return reservationOrderRepository.saveAndFlush(
             ReservationOrder(
                 coinName = coinName,
                 quantity = quantity,
                 targetKimpRate = targetKimpRate,
+                curKimp = kimp,
+                curExchangeRatePrice = exchangeRatePrice,
                 position = position,
                 createdAt = Instant.now()
             )

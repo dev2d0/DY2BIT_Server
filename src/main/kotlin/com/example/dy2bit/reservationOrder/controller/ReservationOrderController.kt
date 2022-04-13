@@ -22,7 +22,7 @@ class ReservationOrderController(
     }
 
     @PostMapping("/api/reservationOrders/createReservationOrder")
-    fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
+    suspend fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
         return UserReservationOrderListDTO(
             reservationOrderService.createReservationOrder(
                 createReservationOrderForm.coinName,

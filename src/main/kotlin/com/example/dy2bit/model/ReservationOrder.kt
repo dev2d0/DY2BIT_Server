@@ -23,6 +23,12 @@ class ReservationOrder(
     var targetKimpRate: Float,
 
     @get:Column(nullable = false)
+    var curKimp: Float,
+
+    @get:Column(nullable = false)
+    var curExchangeRatePrice: Float,
+
+    @get:Column(nullable = false)
     // 업비트 기준으로 참이면 매수 거짓이면 매도
     var position: Boolean,
 

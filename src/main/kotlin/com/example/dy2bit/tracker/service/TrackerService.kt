@@ -56,7 +56,7 @@ class TrackerService(
         } else null
     }
 
-    private suspend fun getKimpPer(): Float = coroutineScope {
+    suspend fun getKimpPer(): Float = coroutineScope {
         val getUpbitPrice = async { coinExchangeServiceFactory.coinExchangeServiceFactory(CoinExchangeType.UPBIT).getCurrentBitPrice() }
         val getBinancePrice = async { coinExchangeServiceFactory.coinExchangeServiceFactory(CoinExchangeType.BINANCE).getCurrentBitPrice() }
         val getExchangeRatePrice = async { exchangeService.getExchangeRatePrice() }
