@@ -30,7 +30,7 @@ class ReservationOrderService(
         return reservationOrderRepository.saveAndFlush(
             ReservationOrder(
                 coinName = coinName,
-                quantity = quantity,
+                unCompletedQuantity = quantity,
                 targetKimpRate = targetKimpRate,
                 curKimp = kimp,
                 curExchangeRatePrice = exchangeRatePrice,
@@ -84,8 +84,8 @@ class ReservationOrderService(
 
     private suspend fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean) = coroutineScope {
         async {
-            tradeUpbit(isBuy, reservationOrder.quantity)
-            tradeBinance(!isBuy, reservationOrder.quantity)
+            tradeUpbit(isBuy, reservationOrder.unCompletedQuantity)
+            tradeBinance(!isBuy, reservationOrder.unCompletedQuantity)
         }.await()
         completedTrade(reservationOrder)
     }

@@ -17,7 +17,10 @@ class ReservationOrder(
     var coinName: String,
 
     @get:Column(nullable = false)
-    var quantity: Float,
+    var unCompletedQuantity: Float,
+
+    @get:Column(nullable = true)
+    var completedQuantity: Float? = 0F,
 
     @get:Column(nullable = false)
     var targetKimpRate: Float,

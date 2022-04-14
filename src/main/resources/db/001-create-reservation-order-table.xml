@@ -12,8 +12,11 @@
             <column name="coin_name" type="VARCHAR(32)">
                 <constraints nullable="false"/>
             </column>
-            <column name="quantity" type="FLOAT">
+            <column name="un_completed_quantity" type="FLOAT">
                 <constraints nullable="false"/>
+            </column>
+            <column name="completed_quantity" type="FLOAT">
+                <constraints nullable="true"/>
             </column>
             <column name="target_kimp_rate" type="FLOAT">
                 <constraints nullable="false"/>

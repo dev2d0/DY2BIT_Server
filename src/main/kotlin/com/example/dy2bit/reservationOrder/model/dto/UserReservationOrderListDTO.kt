@@ -13,7 +13,7 @@ data class UserReservationOrderListDTO(
     constructor(reservationOrder: ReservationOrder) : this(
         id = reservationOrder.id,
         coinName = reservationOrder.coinName,
-        quantity = reservationOrder.quantity,
+        quantity = reservationOrder.unCompletedQuantity,
         targetKimpRate = reservationOrder.targetKimpRate,
         createdAt = reservationOrder.createdAt.toEpochMilli(),
         endAt = reservationOrder.endAt?.toEpochMilli(),
