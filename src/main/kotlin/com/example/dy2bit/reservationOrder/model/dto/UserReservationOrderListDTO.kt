@@ -3,7 +3,7 @@ package com.example.dy2bit.reservationOrder.model.dto
 import com.example.dy2bit.model.ReservationOrder
 
 data class UserReservationOrderListDTO(
-    val id: Long,
+    val id: Long?,
     val coinName: String,
     val quantity: Float,
     val targetKimpRate: Float,
