@@ -29,6 +29,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.liquibase:liquibase-core")
+    implementation("com.auth0:java-jwt:3.3.0")
 	implementation("com.squareup.okhttp3:okhttp:4.9.1")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation ("org.awaitility:awaitility:3.1.2")
