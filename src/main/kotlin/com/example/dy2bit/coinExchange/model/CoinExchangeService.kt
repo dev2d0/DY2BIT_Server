@@ -7,6 +7,7 @@ interface CoinExchangeService {
     val coinExchangeApi: String
 
     fun getCurrentBitPrice(): CoinPriceDTO
-    fun getAccountAndCheckTradePossible(): Boolean
+    suspend fun isBuyTradePossible(curPrice: Float, unCompletedQuantity: Float): Boolean
+    suspend fun isSellTradePossible(unCompletedQuantity: Float): Boolean
     fun tradeCoin(position: Boolean, quantity: Float): Boolean
 }
