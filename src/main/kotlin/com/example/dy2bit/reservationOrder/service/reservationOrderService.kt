@@ -1,9 +1,11 @@
 package com.example.dy2bit.reservationOrder.service
 
+import com.example.dy2bit.coinExchange.model.dto.KimpDTO
+import com.example.dy2bit.coinExchange.service.BinanceCoinExchangeService
 import com.example.dy2bit.coinExchange.service.ExchangeRateService
+import com.example.dy2bit.coinExchange.service.UpbitCoinExchangeService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
-import com.example.dy2bit.tracker.service.TrackerService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
@@ -14,18 +16,36 @@ import java.time.Instant
 @Service
 class ReservationOrderService(
     private val reservationOrderRepository: ReservationOrderRepository,
-    private val trackerService: TrackerService,
     private val exchangeRateService: ExchangeRateService,
+    private val upbitCoinExchangeService: UpbitCoinExchangeService,
+    private val binanceCoinExchangeService: BinanceCoinExchangeService,
 ) {
+    companion object {
+        const val DEFAULT_ORDER = 0.03
+    }
 
     @Transactional
     fun getReservationOrderList(): List<ReservationOrder> {
-        return reservationOrderRepository.findByEndAtNotNull()
+        return reservationOrderRepository.findByEndAtIsNull()
+    }
+
+    @Transactional
+    fun getAliveBuyOneReservationOrder(): ReservationOrder? {
+        return getReservationOrderList()
+            .filter { it.position }
+            .minByOrNull { it.createdAt }
+    }
+
+    @Transactional
+    fun getAliveSellOneReservationOrder(): ReservationOrder? {
+        return getReservationOrderList()
+            .filter { !it.position }
+            .minByOrNull { it.createdAt }
     }
 
     @Transactional
     suspend fun createReservationOrder(coinName: String, quantity: Float, targetKimpRate: Float, position: Boolean): ReservationOrder {
-        val kimp = trackerService.getKimpPer()
+        val kimp = exchangeRateService.getKimpPerAndRelatedCoinPrices().kimpPer
         val exchangeRatePrice = exchangeRateService.getExchangeRatePrice().basePrice
         return reservationOrderRepository.saveAndFlush(
             ReservationOrder(
@@ -48,58 +68,67 @@ class ReservationOrderService(
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    suspend fun tradeReservationOrder(kimpPer: Float) = coroutineScope {
-        val targetBuyReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, true)
-        val targetSellReservation = reservationOrderRepository.findByTargetKimpRateAndPositionAndEndAtNotNull(kimpPer, false)
-        if (targetBuyReservation.isNotEmpty()) {
-            targetBuyReservation.map { reservationOrder ->
-                //  isPossibleTrade()
-                tradeReservationOrder(reservationOrder, true)
+    suspend fun tradeReservationOrder(kimp: KimpDTO) = coroutineScope {
+        // 1. 김프 매수, 매도 타겟 하나씩 가져오기
+        // 2. 김프 가격과 매수 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매수
+        // 3. 김프 가격과 매도 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매도
+        val aliveBuyOneReservationOrder = getAliveBuyOneReservationOrder()
+        val aliveSellOneReservationOrder = getAliveSellOneReservationOrder()
+        val isBuyReservationGoalReached = if (aliveBuyOneReservationOrder != null) aliveBuyOneReservationOrder.targetKimpRate < kimp.kimpPer else false
+        val isSellReservationGoalReached = if (aliveSellOneReservationOrder != null) aliveSellOneReservationOrder?.targetKimpRate > kimp.kimpPer else false
+
+        if (isBuyReservationGoalReached) {
+            if (isBuyTradePossible(kimp.upbitPrice, kimp.binancePrice, aliveBuyOneReservationOrder!!.unCompletedQuantity)) {
+                try {
+                    tradeReservationOrder(aliveBuyOneReservationOrder, true)
+                } catch (e: Error) {
+                }
             }
         }
-        if (targetSellReservation.isNotEmpty()) {
-            // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
-            targetBuyReservation.map { tradeReservationOrder(it, false) }
+        if (isSellReservationGoalReached) {
+            if (isSellTradePossible(aliveSellOneReservationOrder!!.unCompletedQuantity)) {
+                try {
+                    tradeReservationOrder(aliveSellOneReservationOrder, true)
+                } catch (e: Error) {
+                }
+            }
         }
     }
 
-    // TODO: 둘 중 하나만 체결되는 문제를 해결하기 위해 업비트, 바이낸스 잔고 조회 해서 두 거래소 모두 주문 가능한 수량인가 먼저 체크하는 로직 필요
-    private suspend fun isPossibleTrade(): Boolean = coroutineScope {
-        // 잔고의 10프로는 여분으로 둠
-        // 업비트와 바이낸스 각각 계좌에서 10프로를 뺀 가격에서 주문 수량 * 가격이 잔여액을 넘는가 체크
-        val isUpbitPossible = async { getUpbitAccountAndCheckTradePossible() }
-        val isBinancePossible = async { getBinanceAccountAndCheckTradePossible() }
-        return@coroutineScope isUpbitPossible.await() && isBinancePossible.await()
+    private suspend fun isBuyTradePossible(upbitPrice: Float, binancePrice: Float, unCompletedQuantity: Float): Boolean = coroutineScope {
+        val isUpbitBuyTradePossible = async { upbitCoinExchangeService.isBuyTradePossible(upbitPrice, unCompletedQuantity) }
+        val isBinanceBuyTradePossible = async { binanceCoinExchangeService.isBuyTradePossible(binancePrice, unCompletedQuantity) }
+
+        return@coroutineScope isUpbitBuyTradePossible.await() && isBinanceBuyTradePossible.await()
     }
 
-    // TODO: 업비트 계좌 조회 & 주문 가능 여부
-    private fun getUpbitAccountAndCheckTradePossible(): Boolean {
-        return true
-    }
-
-    // TODO: 바이낸스 계좌 조회 & 주문 가능 여부
-    private fun getBinanceAccountAndCheckTradePossible(): Boolean {
-        return true
+    private suspend fun isSellTradePossible(unCompletedQuantity: Float): Boolean = coroutineScope {
+        val isUpbitSellTradePossible = async { upbitCoinExchangeService.isSellTradePossible(unCompletedQuantity) }
+        val isBinanceSellTradePossible = async { binanceCoinExchangeService.isSellTradePossible(unCompletedQuantity) }
+        return@coroutineScope isUpbitSellTradePossible.await() && isBinanceSellTradePossible.await()
     }
 
     private suspend fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean) = coroutineScope {
-        async {
-            tradeUpbit(isBuy, reservationOrder.unCompletedQuantity)
-            tradeBinance(!isBuy, reservationOrder.unCompletedQuantity)
-        }.await()
-        completedTrade(reservationOrder)
+        val quantity = if (reservationOrder.unCompletedQuantity > DEFAULT_ORDER) DEFAULT_ORDER else reservationOrder.unCompletedQuantity
+        // TODO: 알고리즘 테스트 이후에 주석 풀 것 (실제 거래)
+//        withContext(Dispatchers.Default) {
+//            upbitCoinExchangeService.tradeCoin(isBuy, quantity.toFloat())
+//            binanceCoinExchangeService.tradeCoin(!isBuy, quantity.toFloat())
+//        }
+        completedTrade(reservationOrder, quantity.toFloat())
     }
 
-    // TODO: 업비트로 코인 매수, 매도 주문 요청 로직
-    private fun tradeUpbit(position: Boolean, quantity: Float) {
-    }
-
-    // TODO: 바이낸스로 코인 매수, 매도 주문 요청 로직
-    private fun tradeBinance(position: Boolean, quantity: Float) {
-    }
-
-    private fun completedTrade(reservationOrder: ReservationOrder): ReservationOrder {
-        reservationOrder.endAt = Instant.now()
-        return reservationOrderRepository.saveAndFlush(reservationOrder)
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    fun completedTrade(reservationOrder: ReservationOrder, quantity: Float): ReservationOrder {
+        return if (reservationOrder.unCompletedQuantity - quantity > 0) {
+            reservationOrder.unCompletedQuantity = reservationOrder.unCompletedQuantity - quantity
+            reservationOrder.completedQuantity = reservationOrder.completedQuantity?.plus(quantity)
+            reservationOrderRepository.saveAndFlush(reservationOrder)
+        } else {
+            reservationOrder.unCompletedQuantity = reservationOrder.unCompletedQuantity - quantity
+            reservationOrder.completedQuantity = reservationOrder.completedQuantity?.plus(quantity)
+            reservationOrder.endAt = Instant.now()
+            reservationOrderRepository.saveAndFlush(reservationOrder)
+        }
     }
 }
