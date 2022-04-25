@@ -5,6 +5,7 @@ import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.reservationOrder.model.dto.UserReservationOrderListDTO
 import com.example.dy2bit.reservationOrder.model.form.CreateReservationOrderForm
+import com.example.dy2bit.reservationOrder.model.form.UpdateReservationOrderForm
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PathVariable
@@ -38,6 +39,18 @@ class ReservationOrderController(
                 createReservationOrderForm.targetKimpRate,
                 createReservationOrderForm.quantity,
                 createReservationOrderForm.isBuy,
+            )
+        )
+    }
+
+    @PostMapping("/api/reservationOrders/updateReservationOrder")
+    @CrossOrigin(origins = arrayOf("*"))
+    fun updateReservationOrder(@RequestBody updateReservationOrderForm: UpdateReservationOrderForm): UserReservationOrderListDTO {
+        return UserReservationOrderListDTO(
+            reservationOrderService.updateReservationOrder(
+                updateReservationOrderForm.id,
+                updateReservationOrderForm.targetKimpRate,
+                updateReservationOrderForm.unCompletedQuantity,
             )
         )
     }

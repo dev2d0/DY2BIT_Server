@@ -61,8 +61,17 @@ class ReservationOrderService(
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
+    fun updateReservationOrder(id: Long, targetKimpRate: Float, unCompletedQuantity: Float): ReservationOrder {
+        val updatedReservationOrder = reservationOrderRepository.findById(id).get()
+        updatedReservationOrder.targetKimpRate = targetKimpRate
+        updatedReservationOrder.unCompletedQuantity = unCompletedQuantity
+        return reservationOrderRepository.save(updatedReservationOrder)
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     fun cancelReservationOrder(id: Long): ReservationOrder {
         val cancelReservation = reservationOrderRepository.findById(id).get()
+        cancelReservation.unCompletedQuantity = 0F
         cancelReservation.endAt = Instant.now()
         return reservationOrderRepository.save(cancelReservation)
     }
