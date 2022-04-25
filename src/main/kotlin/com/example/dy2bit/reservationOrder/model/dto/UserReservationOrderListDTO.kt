@@ -5,7 +5,8 @@ import com.example.dy2bit.model.ReservationOrder
 data class UserReservationOrderListDTO(
     val id: Long?,
     val coinName: String,
-    val quantity: Float,
+    val unCompletedQuantity: Float,
+    val completedQuantity: Float?,
     val targetKimpRate: Float,
     val createdAt: Long,
     val endAt: Long?
@@ -13,7 +14,8 @@ data class UserReservationOrderListDTO(
     constructor(reservationOrder: ReservationOrder) : this(
         id = reservationOrder.id,
         coinName = reservationOrder.coinName,
-        quantity = reservationOrder.unCompletedQuantity,
+        unCompletedQuantity = reservationOrder.unCompletedQuantity,
+        completedQuantity = reservationOrder.completedQuantity,
         targetKimpRate = reservationOrder.targetKimpRate,
         createdAt = reservationOrder.createdAt.toEpochMilli(),
         endAt = reservationOrder.endAt?.toEpochMilli(),

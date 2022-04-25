@@ -44,12 +44,12 @@ class ReservationOrderService(
     }
 
     @Transactional
-    suspend fun createReservationOrder(coinName: String, quantity: Float, targetKimpRate: Float, position: Boolean): ReservationOrder {
+    suspend fun createReservationOrder(targetKimpRate: Float, quantity: Float, position: Boolean): ReservationOrder {
         val kimp = exchangeRateService.getKimpPerAndRelatedCoinPrices().kimpPer
         val exchangeRatePrice = exchangeRateService.getExchangeRatePrice().basePrice
         return reservationOrderRepository.saveAndFlush(
             ReservationOrder(
-                coinName = coinName,
+                coinName = "BTC",
                 unCompletedQuantity = quantity,
                 targetKimpRate = targetKimpRate,
                 curKimp = kimp,
