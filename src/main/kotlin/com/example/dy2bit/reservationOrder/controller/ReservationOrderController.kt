@@ -5,6 +5,7 @@ import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.reservationOrder.model.dto.UserReservationOrderListDTO
 import com.example.dy2bit.reservationOrder.model.form.CreateReservationOrderForm
+import com.example.dy2bit.reservationOrder.model.form.DeleteReservationOrderForm
 import com.example.dy2bit.reservationOrder.model.form.UpdateReservationOrderForm
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -55,8 +56,8 @@ class ReservationOrderController(
         )
     }
 
-    @PostMapping("/api/reservationOrders/{id}/cancelReservationOrder")
-    fun cancelReservationOrder(@PathVariable id: Long): ReservationOrder {
-        return reservationOrderService.cancelReservationOrder(id)
+    @PostMapping("/api/reservationOrders/deleteReservationOrder")
+    fun deleteReservationOrder(@RequestBody deleteReservationOrderForm: DeleteReservationOrderForm): ReservationOrder {
+        return reservationOrderService.deleteReservationOrder(deleteReservationOrderForm.id)
     }
 }

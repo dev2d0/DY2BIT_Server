@@ -69,11 +69,11 @@ class ReservationOrderService(
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    fun cancelReservationOrder(id: Long): ReservationOrder {
-        val cancelReservation = reservationOrderRepository.findById(id).get()
-        cancelReservation.unCompletedQuantity = 0F
-        cancelReservation.endAt = Instant.now()
-        return reservationOrderRepository.save(cancelReservation)
+    fun deleteReservationOrder(id: Long): ReservationOrder {
+        val deletedReservation = reservationOrderRepository.findById(id).get()
+        deletedReservation.unCompletedQuantity = 0F
+        deletedReservation.endAt = Instant.now()
+        return reservationOrderRepository.save(deletedReservation)
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
