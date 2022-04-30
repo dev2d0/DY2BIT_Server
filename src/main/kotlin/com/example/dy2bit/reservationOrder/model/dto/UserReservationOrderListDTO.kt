@@ -7,6 +7,7 @@ data class UserReservationOrderListDTO(
     val coinName: String,
     val unCompletedQuantity: Float,
     val completedQuantity: Float?,
+    val position: Boolean,
     val targetKimpRate: Float,
     val createdAt: Long,
     val endAt: Long?
@@ -16,6 +17,7 @@ data class UserReservationOrderListDTO(
         coinName = reservationOrder.coinName,
         unCompletedQuantity = reservationOrder.unCompletedQuantity,
         completedQuantity = reservationOrder.completedQuantity,
+        position = reservationOrder.position,
         targetKimpRate = reservationOrder.targetKimpRate,
         createdAt = reservationOrder.createdAt.toEpochMilli(),
         endAt = reservationOrder.endAt?.toEpochMilli(),

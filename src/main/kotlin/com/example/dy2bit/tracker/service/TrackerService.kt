@@ -39,7 +39,7 @@ class TrackerService(
     private fun updateTodayKimpMinMaxRate(kimpPer: Float): Tracker? {
         val startDatetime = LocalDateTime.now().with(LocalTime.MIN).toInstant(ZoneOffset.UTC)
         val endDatetime = LocalDateTime.now().with(LocalTime.MAX).toInstant(ZoneOffset.UTC)
-        val now = LocalDateTime.now();
+        val now = LocalDateTime.now()
         println(startDatetime)
         println(endDatetime)
         println(now)
