@@ -6,6 +6,7 @@ import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.coinExchange.service.UpbitCoinExchangeService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
+import com.example.dy2bit.reservationOrder.model.dto.UserAccountDTO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
@@ -41,6 +42,12 @@ class ReservationOrderService(
         return getReservationOrderList()
             .filter { !it.position }
             .minByOrNull { it.createdAt }
+    }
+
+    suspend fun getUserAccount(): UserAccountDTO {
+        val upbitAccount = upbitCoinExchangeService.getAccount()
+        val binanceAccount = binanceCoinExchangeService.getAccount()
+        return UserAccountDTO(upbitAccount, binanceAccount)
     }
 
     @Transactional
