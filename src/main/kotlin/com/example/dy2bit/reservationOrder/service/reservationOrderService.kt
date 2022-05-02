@@ -7,8 +7,10 @@ import com.example.dy2bit.coinExchange.service.UpbitCoinExchangeService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
 import com.example.dy2bit.reservationOrder.model.dto.UserAccountDTO
+import com.example.dy2bit.utils.exception.Dy2bitException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
@@ -20,6 +22,7 @@ class ReservationOrderService(
     private val exchangeRateService: ExchangeRateService,
     private val upbitCoinExchangeService: UpbitCoinExchangeService,
     private val binanceCoinExchangeService: BinanceCoinExchangeService,
+    @Value("\${dy2bit-secret.key}") private val dy2bitSecretKey: String,
 ) {
     companion object {
         const val DEFAULT_ORDER = 0.03
@@ -90,11 +93,12 @@ class ReservationOrderService(
         // 3. 김프 가격과 매도 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매도
         val aliveBuyOneReservationOrder = getAliveBuyOneReservationOrder()
         val aliveSellOneReservationOrder = getAliveSellOneReservationOrder()
-        val isBuyReservationGoalReached = if (aliveBuyOneReservationOrder != null) aliveBuyOneReservationOrder.targetKimpRate < kimp.kimpPer else false
-        val isSellReservationGoalReached = if (aliveSellOneReservationOrder != null) aliveSellOneReservationOrder?.targetKimpRate > kimp.kimpPer else false
+        val isBuyReservationGoalReached = aliveBuyOneReservationOrder != null && aliveBuyOneReservationOrder.targetKimpRate > kimp.kimpPer
+        val isSellReservationGoalReached = aliveSellOneReservationOrder != null && aliveSellOneReservationOrder?.targetKimpRate < kimp.kimpPer
 
         if (isBuyReservationGoalReached) {
             if (isBuyTradePossible(kimp.upbitPrice, kimp.binancePrice, aliveBuyOneReservationOrder!!.unCompletedQuantity)) {
+                println("매수 가능")
                 try {
                     tradeReservationOrder(aliveBuyOneReservationOrder, true)
                 } catch (e: Error) {
@@ -103,6 +107,7 @@ class ReservationOrderService(
         }
         if (isSellReservationGoalReached) {
             if (isSellTradePossible(aliveSellOneReservationOrder!!.unCompletedQuantity)) {
+                println("매도 가능")
                 try {
                     tradeReservationOrder(aliveSellOneReservationOrder, true)
                 } catch (e: Error) {
@@ -146,5 +151,23 @@ class ReservationOrderService(
             reservationOrder.endAt = Instant.now()
             reservationOrderRepository.saveAndFlush(reservationOrder)
         }
+    }
+
+    fun checkDy2bitSecretKey(secretKey: String): Boolean {
+        if(secretKey != dy2bitSecretKey) {
+            throw Dy2bitException("시크릿 키가 일치하지 않습니다.")
+        } else {
+            return true
+        }
+    }
+
+    @Transactional
+    fun getHistoryReservationOrderList(): List<ReservationOrder> {
+        return reservationOrderRepository.findByEndAtIsNotNullOrderByCreatedAtDesc()
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    fun deleteHistoryReservationOrder(id: Long) {
+        return reservationOrderRepository.deleteById(id)
     }
 }

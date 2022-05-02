@@ -4,4 +4,5 @@ data class UpdateReservationOrderForm(
     val id: Long,
     val targetKimpRate: Float,
     val unCompletedQuantity: Float,
+    val secretKey: String,
 )
