@@ -1,12 +1,15 @@
 package com.example.dy2bit.tracker.service
 
 import com.example.dy2bit.coinExchange.service.ExchangeRateService
+import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.model.Tracker
 import com.example.dy2bit.repository.TrackerRepository
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.*
 
 @Service
@@ -28,23 +31,21 @@ class TrackerService(
         )
     }
 
-    suspend fun trackerEveryJob() = coroutineScope {
-        val kimpPer = async { exchangeRateService.getKimpPerAndRelatedCoinPrices() }.await()
-        async {
-            reservationOrderService.tradeReservationOrder(kimpPer)
-            updateTodayKimpMinMaxRate(kimpPer.kimpPer)
+    fun trackerEveryJob() {
+        runBlocking {
+            val kimpPer = async { exchangeRateService.getKimpPerAndRelatedCoinPrices() }.await()
+            async {
+                reservationOrderService.tradeReservationOrder(kimpPer)
+                updateTodayKimpMinMaxRate(kimpPer.kimpPer)
+            }
         }
-    }.await()
+    }
 
     private fun updateTodayKimpMinMaxRate(kimpPer: Float): Tracker? {
         val startDatetime = LocalDateTime.now().with(LocalTime.MIN).toInstant(ZoneOffset.UTC)
         val endDatetime = LocalDateTime.now().with(LocalTime.MAX).toInstant(ZoneOffset.UTC)
-        val now = LocalDateTime.now()
-        println(startDatetime)
-        println(endDatetime)
-        println(now)
+
         val target = trackerRepository.findByCreatedAtBetweenAndMaxRateLessThanOrMinRateGreaterThan(startDatetime, endDatetime, kimpPer, kimpPer)
-        println(target.last().toString())
         return if (target.isNotEmpty()) {
             val targetLast = target.last()
             if (targetLast!!.maxRate < kimpPer) {
@@ -57,5 +58,10 @@ class TrackerService(
             }
             trackerRepository.save(targetLast)
         } else null
+    }
+
+    @Transactional
+    fun getDailyKimpList(): List<Tracker> {
+        return trackerRepository.findAllByCoinNameOrderByCreatedAtDesc("BTC")
     }
 }
