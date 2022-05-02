@@ -4,11 +4,15 @@ import com.example.dy2bit.coinExchange.model.dto.KimpDTO
 import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.reservationOrder.model.dto.UserAccountDTO
+import com.example.dy2bit.reservationOrder.model.dto.UserDailyKimpListDTO
+import com.example.dy2bit.reservationOrder.model.dto.UserHistoryReservationOrderListDTO
 import com.example.dy2bit.reservationOrder.model.dto.UserReservationOrderListDTO
 import com.example.dy2bit.reservationOrder.model.form.CreateReservationOrderForm
+import com.example.dy2bit.reservationOrder.model.form.DeleteHistoryReservationOrderForm
 import com.example.dy2bit.reservationOrder.model.form.DeleteReservationOrderForm
 import com.example.dy2bit.reservationOrder.model.form.UpdateReservationOrderForm
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
+import com.example.dy2bit.tracker.service.TrackerService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody
 @RestController
 class ReservationOrderController(
     private val reservationOrderService: ReservationOrderService,
+    private val trackerService: TrackerService,
     private val exchangeRateService: ExchangeRateService,
 ) {
     @PostMapping("/api/reservationOrders/currentCoinPrices")
@@ -42,6 +47,7 @@ class ReservationOrderController(
     @PostMapping("/api/reservationOrders/createReservationOrder")
     @CrossOrigin(origins = ["*"])
     suspend fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
+        reservationOrderService.checkDy2bitSecretKey(createReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
             reservationOrderService.createReservationOrder(
                 createReservationOrderForm.targetKimpRate,
@@ -54,6 +60,7 @@ class ReservationOrderController(
     @PostMapping("/api/reservationOrders/updateReservationOrder")
     @CrossOrigin(origins = ["*"])
     fun updateReservationOrder(@RequestBody updateReservationOrderForm: UpdateReservationOrderForm): UserReservationOrderListDTO {
+        reservationOrderService.checkDy2bitSecretKey(updateReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
             reservationOrderService.updateReservationOrder(
                 updateReservationOrderForm.id,
@@ -66,6 +73,29 @@ class ReservationOrderController(
     @PostMapping("/api/reservationOrders/deleteReservationOrder")
     @CrossOrigin(origins = ["*"])
     fun deleteReservationOrder(@RequestBody deleteReservationOrderForm: DeleteReservationOrderForm): ReservationOrder {
+        reservationOrderService.checkDy2bitSecretKey(deleteReservationOrderForm.secretKey)
         return reservationOrderService.deleteReservationOrder(deleteReservationOrderForm.id)
+    }
+
+    @PostMapping("/api/reservationOrders/getHistoryReservationOrderList")
+    @CrossOrigin(origins = ["*"])
+    fun historyReservationOrderList(): List<UserHistoryReservationOrderListDTO> {
+        return reservationOrderService.getHistoryReservationOrderList().map {
+            UserHistoryReservationOrderListDTO(it)
+        }
+    }
+
+    @PostMapping("/api/reservationOrders/deleteHistoryReservationOrder")
+    @CrossOrigin(origins = ["*"])
+    fun deleteHistoryReservationOrder(@RequestBody deleteHistoryReservationOrderForm: DeleteHistoryReservationOrderForm) {
+        return reservationOrderService.deleteHistoryReservationOrder(deleteHistoryReservationOrderForm.id)
+    }
+
+    @PostMapping("/api/reservationOrders/getDailyKimpList")
+    @CrossOrigin(origins = ["*"])
+    fun dailyKimpList(): List<UserDailyKimpListDTO> {
+        return trackerService.getDailyKimpList().map {
+            UserDailyKimpListDTO(it)
+        }
     }
 }
