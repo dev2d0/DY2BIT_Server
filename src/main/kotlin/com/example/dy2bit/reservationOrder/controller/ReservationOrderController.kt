@@ -2,6 +2,8 @@ package com.example.dy2bit.reservationOrder.controller
 
 import com.example.dy2bit.coinExchange.model.dto.KimpDTO
 import com.example.dy2bit.coinExchange.service.ExchangeRateService
+import com.example.dy2bit.error.service.ErrorService
+import com.example.dy2bit.error.service.model.ErrorDTO
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.reservationOrder.model.dto.UserAccountDTO
 import com.example.dy2bit.reservationOrder.model.dto.UserDailyKimpListDTO
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody
 class ReservationOrderController(
     private val reservationOrderService: ReservationOrderService,
     private val trackerService: TrackerService,
+    private val errorService: ErrorService,
     private val exchangeRateService: ExchangeRateService,
 ) {
     @PostMapping("/api/reservationOrders/currentCoinPrices")
@@ -97,5 +100,17 @@ class ReservationOrderController(
         return trackerService.getDailyKimpList().map {
             UserDailyKimpListDTO(it)
         }
+    }
+
+    @PostMapping("/api/reservationOrders/getErrorReport")
+    @CrossOrigin(origins = ["*"])
+    fun getErrorReport(): ErrorDTO {
+        return ErrorDTO(errorService.getError())
+    }
+
+    @PostMapping("/api/reservationOrders/confirmErrorReport")
+    @CrossOrigin(origins = ["*"])
+    fun confirmErrorReport(): ErrorDTO {
+        return errorService.confirmErrorReport()
     }
 }

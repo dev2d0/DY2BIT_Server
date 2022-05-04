@@ -14,8 +14,16 @@ class ErrorService(
 ) {
     @Transactional
     fun getError(): Error {
-        println(errorRepository.findAllByCreatedAtNotNull().last().toString())
         return errorRepository.findAllByCreatedAtNotNull().last()
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    fun confirmErrorReport(): ErrorDTO {
+        val confirmedError = getError()
+        confirmedError.errorFoundedAt = null
+        confirmedError.errorMessage = null
+        confirmedError.errorTarget = null
+        return ErrorDTO(errorRepository.save(confirmedError))
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
