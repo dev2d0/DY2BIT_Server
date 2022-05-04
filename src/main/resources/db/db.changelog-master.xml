@@ -8,4 +8,5 @@
     <include file="001-create-reservation-order-table.xml" relativeToChangelogFile="true" />
     <include file="002-create-tracker-table.xml" relativeToChangelogFile="true" />
     <include file="003-create-member-table.xml" relativeToChangelogFile="true" />
+    <include file="004-create-error-table.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
