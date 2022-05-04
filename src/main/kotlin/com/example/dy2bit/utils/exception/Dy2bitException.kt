@@ -13,7 +13,12 @@ class Dy2bitException private constructor(
     val title: String?,
     val titleResolvable: MessageSourceResolvable?
 ) : RuntimeException() {
-    constructor(msg: String, code: ErrorCode = ErrorCode.REFUSED_STREAM, extra: Map<String, String> = emptyMap(), title: String? = null) : this(
+    constructor(
+        msg: String,
+        code: ErrorCode = ErrorCode.REFUSED_STREAM,
+        extra: Map<String, String> = emptyMap(),
+        title: String? = null
+    ) : this(
         msg = msg,
         resolvable = null,
         code = code,

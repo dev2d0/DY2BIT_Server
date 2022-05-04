@@ -1,12 +1,10 @@
 package com.example.dy2bit.tracker.service
 
 import com.example.dy2bit.coinExchange.service.ExchangeRateService
-import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.model.Tracker
 import com.example.dy2bit.repository.TrackerRepository
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

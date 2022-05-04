@@ -90,7 +90,7 @@ class ReservationOrderService(
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     suspend fun tradeReservationOrder(kimp: KimpDTO) = coroutineScope {
-        if(errorService.getError().errorFoundedAt != null) return@coroutineScope false else {
+        if (errorService.getError().errorFoundedAt != null) return@coroutineScope false else {
             // 1. 김프 매수, 매도 타겟 하나씩 가져오기
             // 2. 김프 가격과 매수 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매수
             // 3. 김프 가격과 매도 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매도
@@ -135,13 +135,13 @@ class ReservationOrderService(
         val buyPrice = if (isBuy) Math.round(quantity * upbitPrice) else null
         try {
             val upbitTrade = async { upbitCoinExchangeService.tradeCoin(isBuy, quantity, buyPrice) }.await()
-            if(upbitTrade.error != null) errorService.reportError("Upbit", upbitTrade.error.toString())
+            if (upbitTrade.error != null) errorService.reportError("Upbit", upbitTrade.error.toString())
 
             val binanceTrade = binanceCoinExchangeService.tradeCoin(!isBuy, quantity)
-            if(binanceTrade.code != null && binanceTrade.msg != null) errorService.reportError("Binance", "${binanceTrade.code}${binanceTrade.msg}")
+            if (binanceTrade.code != null && binanceTrade.msg != null) errorService.reportError("Binance", "${binanceTrade.code}${binanceTrade.msg}")
             completedTrade(reservationOrder, quantity)
         } catch (e: Exception) {
-            println("에러 발생"+e)
+            println("에러 발생" + e)
         }
     }
 
@@ -160,7 +160,7 @@ class ReservationOrderService(
     }
 
     fun checkDy2bitSecretKey(secretKey: String): Boolean {
-        if(secretKey != dy2bitSecretKey) {
+        if (secretKey != dy2bitSecretKey) {
             throw Dy2bitException("시크릿 키가 일치하지 않습니다.")
         } else {
             return true

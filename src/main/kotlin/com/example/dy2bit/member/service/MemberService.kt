@@ -26,7 +26,6 @@ class MemberService(
 
     @Transactional(readOnly = true)
     fun isLoginSuccess(email: String, password: String): Boolean {
-        println("isLoginSuccess")
         val user = findUser(email)
         if (password != user.password) {
             return false

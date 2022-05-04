@@ -70,9 +70,6 @@ class BinanceCoinExchangeService(
         val actualSign = String(Hex.encodeHex(hmacSha256.doFinal(beforeQuery.toByteArray())))
         val queryString = "$beforeQuery&signature=$actualSign"
 
-        println("바이낸스 잔고 조회"+actualSign)
-        println("바이낸스 잔고 조회1"+queryString)
-
         val httpResponse = okHttpClient.newCall(
             Request.Builder()
                 .url("$coinExchangeApi/fapi/v2/account?$queryString")
@@ -88,7 +85,7 @@ class BinanceCoinExchangeService(
     suspend fun tradeCoin(position: Boolean, quantity: Float) = coroutineScope {
         val timestamp = System.currentTimeMillis().toString()
         val positionType = if (position) "BUY" else "SELL"
-        val beforeQuery = "symbol=BTCUSDT&side=${positionType}&type=MARKET&quantity=${quantity}&timestamp=$timestamp"
+        val beforeQuery = "symbol=BTCUSDT&side=$positionType&type=MARKET&quantity=$quantity&timestamp=$timestamp"
 
         val hmacSha256 = Mac.getInstance("HmacSHA256")
         val secKey = SecretKeySpec(binanceSecretKey.toByteArray(), "HmacSHA256")
@@ -96,9 +93,6 @@ class BinanceCoinExchangeService(
 
         val actualSign = String(Hex.encodeHex(hmacSha256.doFinal(beforeQuery.toByteArray())))
         val queryString = "$beforeQuery&signature=$actualSign"
-
-        println("바이낸스 주문"+actualSign)
-        println("바이낸스 주문1"+queryString)
 
         val formBody: RequestBody = FormBody.Builder()
             .add("symbol", "BTCUSDT")
@@ -108,10 +102,6 @@ class BinanceCoinExchangeService(
             .add("timestamp", timestamp)
             .add("signature", actualSign)
             .build()
-
-        println("바이낸스 매수 중1"+queryString)
-        println("바이낸스 매수 중2"+formBody.toString())
-        println("바이낸스 매수 중3"+actualSign)
 
         val httpResponse = okHttpClient.newCall(
             Request.Builder()
