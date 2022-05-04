@@ -4,6 +4,7 @@ import com.example.dy2bit.coinExchange.model.dto.KimpDTO
 import com.example.dy2bit.coinExchange.service.BinanceCoinExchangeService
 import com.example.dy2bit.coinExchange.service.ExchangeRateService
 import com.example.dy2bit.coinExchange.service.UpbitCoinExchangeService
+import com.example.dy2bit.error.service.ErrorService
 import com.example.dy2bit.model.ReservationOrder
 import com.example.dy2bit.repository.ReservationOrderRepository
 import com.example.dy2bit.reservationOrder.model.dto.UserAccountDTO
@@ -21,11 +22,12 @@ class ReservationOrderService(
     private val reservationOrderRepository: ReservationOrderRepository,
     private val exchangeRateService: ExchangeRateService,
     private val upbitCoinExchangeService: UpbitCoinExchangeService,
+    private val errorService: ErrorService,
     private val binanceCoinExchangeService: BinanceCoinExchangeService,
     @Value("\${dy2bit-secret.key}") private val dy2bitSecretKey: String,
 ) {
     companion object {
-        const val DEFAULT_ORDER = 0.03
+        const val DEFAULT_ORDER: Float = 0.03F
     }
 
     @Transactional
@@ -88,31 +90,30 @@ class ReservationOrderService(
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     suspend fun tradeReservationOrder(kimp: KimpDTO) = coroutineScope {
-        // 1. 김프 매수, 매도 타겟 하나씩 가져오기
-        // 2. 김프 가격과 매수 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매수
-        // 3. 김프 가격과 매도 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매도
-        val aliveBuyOneReservationOrder = getAliveBuyOneReservationOrder()
-        val aliveSellOneReservationOrder = getAliveSellOneReservationOrder()
-        val isBuyReservationGoalReached = aliveBuyOneReservationOrder != null && aliveBuyOneReservationOrder.targetKimpRate > kimp.kimpPer
-        val isSellReservationGoalReached = aliveSellOneReservationOrder != null && aliveSellOneReservationOrder?.targetKimpRate < kimp.kimpPer
-
-        if (isBuyReservationGoalReached) {
-            if (isBuyTradePossible(kimp.upbitPrice, kimp.binancePrice, aliveBuyOneReservationOrder!!.unCompletedQuantity)) {
-                println("매수 가능")
-                try {
-                    tradeReservationOrder(aliveBuyOneReservationOrder, true)
-                } catch (e: Error) {
+        if(errorService.getError().errorFoundedAt != null) return@coroutineScope false else {
+            // 1. 김프 매수, 매도 타겟 하나씩 가져오기
+            // 2. 김프 가격과 매수 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매수
+            // 3. 김프 가격과 매도 타겟 비교 -> 맞으면 업비트, 바이낸스 주문 가능한지 조사 -> 매도
+            val aliveBuyOneReservationOrder = getAliveBuyOneReservationOrder()
+            val aliveSellOneReservationOrder = getAliveSellOneReservationOrder()
+            val isBuyReservationGoalReached = aliveBuyOneReservationOrder != null && aliveBuyOneReservationOrder.targetKimpRate > kimp.kimpPer
+            val isSellReservationGoalReached = aliveSellOneReservationOrder != null && aliveSellOneReservationOrder?.targetKimpRate < kimp.kimpPer
+            if (isBuyReservationGoalReached) {
+                if (isBuyTradePossible(kimp.upbitPrice, kimp.binancePrice, aliveBuyOneReservationOrder!!.unCompletedQuantity)) {
+                    try {
+                        tradeReservationOrder(aliveBuyOneReservationOrder, true, kimp.upbitPrice)
+                    } catch (e: Error) {
+                    }
                 }
             }
-        }
-        if (isSellReservationGoalReached) {
-            if (isSellTradePossible(aliveSellOneReservationOrder!!.unCompletedQuantity)) {
-                println("매도 가능")
-                try {
-                    tradeReservationOrder(aliveSellOneReservationOrder, true)
-                } catch (e: Error) {
-                }
-            }
+            if (isSellReservationGoalReached) {
+                if (isSellTradePossible(aliveSellOneReservationOrder!!.unCompletedQuantity)) {
+                    try {
+                        tradeReservationOrder(aliveSellOneReservationOrder, false, kimp.upbitPrice)
+                    } catch (e: Error) {
+                    }
+                } else false
+            } else false
         }
     }
 
@@ -129,14 +130,19 @@ class ReservationOrderService(
         return@coroutineScope isUpbitSellTradePossible.await() && isBinanceSellTradePossible.await()
     }
 
-    private suspend fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean) = coroutineScope {
+    private suspend fun tradeReservationOrder(reservationOrder: ReservationOrder, isBuy: Boolean, upbitPrice: Float) = coroutineScope {
         val quantity = if (reservationOrder.unCompletedQuantity > DEFAULT_ORDER) DEFAULT_ORDER else reservationOrder.unCompletedQuantity
-        // TODO: 알고리즘 테스트 이후에 주석 풀 것 (실제 거래)
-//        withContext(Dispatchers.Default) {
-//            upbitCoinExchangeService.tradeCoin(isBuy, quantity.toFloat())
-//            binanceCoinExchangeService.tradeCoin(!isBuy, quantity.toFloat())
-//        }
-        completedTrade(reservationOrder, quantity.toFloat())
+        val buyPrice = if (isBuy) Math.round(quantity * upbitPrice) else null
+        try {
+            val upbitTrade = async { upbitCoinExchangeService.tradeCoin(isBuy, quantity, buyPrice) }.await()
+            if(upbitTrade.error != null) errorService.reportError("Upbit", upbitTrade.error.toString())
+
+            val binanceTrade = binanceCoinExchangeService.tradeCoin(!isBuy, quantity)
+            if(binanceTrade.code != null && binanceTrade.msg != null) errorService.reportError("Binance", "${binanceTrade.code}${binanceTrade.msg}")
+            completedTrade(reservationOrder, quantity)
+        } catch (e: Exception) {
+            println("에러 발생"+e)
+        }
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

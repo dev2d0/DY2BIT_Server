@@ -9,5 +9,4 @@ interface CoinExchangeService {
     fun getCurrentBitPrice(): CoinPriceDTO
     suspend fun isBuyTradePossible(curPrice: Float, unCompletedQuantity: Float): Boolean
     suspend fun isSellTradePossible(unCompletedQuantity: Float): Boolean
-    fun tradeCoin(position: Boolean, quantity: Float): Boolean
 }
