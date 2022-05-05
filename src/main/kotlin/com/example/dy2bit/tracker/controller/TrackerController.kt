@@ -3,17 +3,15 @@ package com.example.dy2bit.tracker.controller
 import com.example.dy2bit.tracker.service.TrackerService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.stereotype.Controller
 
-@RestController
+@Controller
 class TrackerController(
     private val trackerService: TrackerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    //@Scheduled(fixedDelay=4000)
-    @PostMapping("/api/tracker/job")
+    @Scheduled(fixedDelay=4000)
     fun trackerEveryJob() {
         logger.info("trackerEveryJob started")
         trackerService.trackerEveryJob()
