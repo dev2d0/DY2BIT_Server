@@ -11,6 +11,7 @@ import com.example.dy2bit.reservationOrder.model.dto.UserAccountDTO
 import com.example.dy2bit.utils.exception.Dy2bitException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
@@ -29,6 +30,8 @@ class ReservationOrderService(
     companion object {
         const val DEFAULT_ORDER: Float = 0.03F
     }
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun getReservationOrderList(): List<ReservationOrder> {
@@ -135,13 +138,15 @@ class ReservationOrderService(
         val buyPrice = if (isBuy) Math.round(quantity * upbitPrice) else null
         try {
             val upbitTrade = async { upbitCoinExchangeService.tradeCoin(isBuy, quantity, buyPrice) }.await()
+            logger.info("upbit에서 주문 발생 $upbitTrade")
             if (upbitTrade.error != null) errorService.reportError("Upbit", upbitTrade.error.toString())
 
             val binanceTrade = binanceCoinExchangeService.tradeCoin(!isBuy, quantity)
+            logger.info("binance에서 주문 발생 $binanceTrade")
             if (binanceTrade.code != null && binanceTrade.msg != null) errorService.reportError("Binance", "${binanceTrade.code}${binanceTrade.msg}")
             completedTrade(reservationOrder, quantity)
         } catch (e: Exception) {
-            println("에러 발생" + e)
+            logger.info("에러 발생 $e")
         }
     }
 
