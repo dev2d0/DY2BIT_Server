@@ -6,6 +6,6 @@ end_of_line = lf
 indent_style = space
 indent_size = 4
 insert_final_newline = true
-max_line_length = 120
+max_line_length = 200
 tab_width = 4
 disabled_rules = no-wildcard-imports,import-ordering,comment-spacing
