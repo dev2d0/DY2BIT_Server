@@ -11,7 +11,7 @@ class TrackerController(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Scheduled(fixedDelay=4000)
+    @Scheduled(fixedDelay = 4000)
     fun trackerEveryJob() {
         logger.info("trackerEveryJob started")
         trackerService.trackerEveryJob()
