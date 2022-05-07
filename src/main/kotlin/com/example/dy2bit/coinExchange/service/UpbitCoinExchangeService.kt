@@ -10,7 +10,6 @@ import com.example.dy2bit.model.dto.UpbitPriceDTO
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
-import javafx.util.Builder
 import kotlinx.coroutines.coroutineScope
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
