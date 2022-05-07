@@ -16,7 +16,7 @@ data class BinanceTradeResultDTO(
     @SerializedName(value = "side")
     val side: String,
     @SerializedName(value = "code")
-    val code: String,
+    val code: String?,
     @SerializedName(value = "msg")
-    val msg: String,
+    val msg: String?,
 )

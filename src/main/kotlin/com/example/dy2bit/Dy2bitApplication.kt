@@ -12,6 +12,6 @@ class Dy2bitApplication
 
 @PostConstruct
 fun main(args: Array<String>) {
-    TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+    TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"))
     runApplication<Dy2bitApplication>(*args)
 }
