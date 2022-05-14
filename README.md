@@ -73,4 +73,3 @@
 ## 배포전략
 - Server: AWS EC2
 - Front: AWS Amplify
-
