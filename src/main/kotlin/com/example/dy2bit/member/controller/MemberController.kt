@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*
 class MemberController(
     private val memberService: MemberService
 ) {
-    @CrossOrigin(origins = arrayOf("*"))
     @PostMapping("/login")
     fun logIn(@RequestBody userLoginReq: UserLoginForm): ResponseEntity<UserLoginDTO> {
         if (!memberService.existsUser(userLoginReq.email)) {

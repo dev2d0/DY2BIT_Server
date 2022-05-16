@@ -15,7 +15,6 @@ import com.example.dy2bit.reservationOrder.model.form.DeleteReservationOrderForm
 import com.example.dy2bit.reservationOrder.model.form.UpdateReservationOrderForm
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import com.example.dy2bit.tracker.service.TrackerService
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.RequestBody
@@ -28,19 +27,16 @@ class ReservationOrderController(
     private val exchangeRateService: ExchangeRateService,
 ) {
     @PostMapping("/api/reservationOrders/currentCoinPrices")
-    @CrossOrigin(origins = ["*"])
     suspend fun getCurrentCoinPrices(): KimpDTO {
         return exchangeRateService.getKimpPerAndRelatedCoinPrices()
     }
 
     @PostMapping("/api/reservationOrders/getUserAccount")
-    @CrossOrigin(origins = ["*"])
     suspend fun getUserAccount(): UserAccountDTO {
         return reservationOrderService.getUserAccount()
     }
 
     @PostMapping("/api/reservationOrders/getReservationOrderList")
-    @CrossOrigin(origins = ["*"])
     fun getReservationOrderList(): List<UserReservationOrderListDTO> {
         return reservationOrderService.getReservationOrderList().map {
             UserReservationOrderListDTO(it)
@@ -48,7 +44,6 @@ class ReservationOrderController(
     }
 
     @PostMapping("/api/reservationOrders/createReservationOrder")
-    @CrossOrigin(origins = ["*"])
     suspend fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
         reservationOrderService.checkDy2bitSecretKey(createReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
@@ -61,7 +56,6 @@ class ReservationOrderController(
     }
 
     @PostMapping("/api/reservationOrders/updateReservationOrder")
-    @CrossOrigin(origins = ["*"])
     fun updateReservationOrder(@RequestBody updateReservationOrderForm: UpdateReservationOrderForm): UserReservationOrderListDTO {
         reservationOrderService.checkDy2bitSecretKey(updateReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
@@ -74,14 +68,12 @@ class ReservationOrderController(
     }
 
     @PostMapping("/api/reservationOrders/deleteReservationOrder")
-    @CrossOrigin(origins = ["*"])
     fun deleteReservationOrder(@RequestBody deleteReservationOrderForm: DeleteReservationOrderForm): ReservationOrder {
         reservationOrderService.checkDy2bitSecretKey(deleteReservationOrderForm.secretKey)
         return reservationOrderService.deleteReservationOrder(deleteReservationOrderForm.id)
     }
 
     @PostMapping("/api/reservationOrders/getHistoryReservationOrderList")
-    @CrossOrigin(origins = ["*"])
     fun historyReservationOrderList(): List<UserHistoryReservationOrderListDTO> {
         return reservationOrderService.getHistoryReservationOrderList().map {
             UserHistoryReservationOrderListDTO(it)
@@ -89,13 +81,11 @@ class ReservationOrderController(
     }
 
     @PostMapping("/api/reservationOrders/deleteHistoryReservationOrder")
-    @CrossOrigin(origins = ["*"])
     fun deleteHistoryReservationOrder(@RequestBody deleteHistoryReservationOrderForm: DeleteHistoryReservationOrderForm) {
         return reservationOrderService.deleteHistoryReservationOrder(deleteHistoryReservationOrderForm.id)
     }
 
     @PostMapping("/api/reservationOrders/getDailyKimpList")
-    @CrossOrigin(origins = ["*"])
     fun dailyKimpList(): List<UserDailyKimpListDTO> {
         return trackerService.getDailyKimpList().map {
             UserDailyKimpListDTO(it)
@@ -103,13 +93,11 @@ class ReservationOrderController(
     }
 
     @PostMapping("/api/reservationOrders/getErrorReport")
-    @CrossOrigin(origins = ["*"])
     fun getErrorReport(): ErrorDTO {
         return ErrorDTO(errorService.getError())
     }
 
     @PostMapping("/api/reservationOrders/confirmErrorReport")
-    @CrossOrigin(origins = ["*"])
     fun confirmErrorReport(): ErrorDTO {
         return errorService.confirmErrorReport()
     }
