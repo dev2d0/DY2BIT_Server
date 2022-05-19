@@ -43,7 +43,7 @@ class TrackerService(
         val startDatetime = LocalDateTime.now().with(LocalTime.MIN).toInstant(ZoneOffset.UTC)
         val endDatetime = LocalDateTime.now().with(LocalTime.MAX).toInstant(ZoneOffset.UTC)
 
-        val target = trackerRepository.findByCreatedAtBetweenAndMaxRateLessThanOrMinRateGreaterThan(startDatetime, endDatetime, kimpPer, kimpPer)
+        val target = trackerRepository.findByMaxRateLessThanOrMinRateGreaterThanAndCreatedAtBetween(kimpPer, kimpPer, startDatetime, endDatetime)
         return if (target.isNotEmpty()) {
             val targetLast = target.last()
             if (targetLast!!.maxRate < kimpPer) {

@@ -5,11 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.time.Instant
 
 interface TrackerRepository : JpaRepository<Tracker, Long> {
-    fun findByCreatedAtBetweenAndMaxRateLessThanOrMinRateGreaterThan(
-        from: Instant,
-        to: Instant,
+    fun findByMaxRateLessThanOrMinRateGreaterThanAndCreatedAtBetween(
         kimPer: Float,
         kimPer1: Float,
+        from: Instant,
+        to: Instant,
     ): List<Tracker?>
 
     fun findAllByCoinNameOrderByCreatedAtDesc(coinName: String): List<Tracker>
