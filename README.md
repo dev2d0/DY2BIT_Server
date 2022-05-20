@@ -71,7 +71,7 @@
 - 매일 00시00분에 Tracker 하나씩 추가 (하루동안은 이 Tracker에 업데이트 하는 것)
 
 ## 배포전략
-- Server: AWS EC2
+- Server: AWS EC2, LoadBalancer(ALB), AWS Certificate Manager(ACM), Route53
 - Front: AWS Amplify
 
 ## 추가해야 할 것 
