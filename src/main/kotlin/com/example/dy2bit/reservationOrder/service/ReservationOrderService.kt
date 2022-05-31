@@ -42,14 +42,14 @@ class ReservationOrderService(
     fun getAliveBuyOneReservationOrder(): ReservationOrder? {
         return getReservationOrderList()
             .filter { it.position }
-            .minByOrNull { it.createdAt }
+            .maxByOrNull { it.targetKimpRate }
     }
 
     @Transactional
     fun getAliveSellOneReservationOrder(): ReservationOrder? {
         return getReservationOrderList()
             .filter { !it.position }
-            .minByOrNull { it.createdAt }
+            .minByOrNull { it.targetKimpRate }
     }
 
     suspend fun getUserAccount(): UserAccountDTO {
@@ -100,7 +100,7 @@ class ReservationOrderService(
             val aliveBuyOneReservationOrder = getAliveBuyOneReservationOrder()
             val aliveSellOneReservationOrder = getAliveSellOneReservationOrder()
             val isBuyReservationGoalReached = aliveBuyOneReservationOrder != null && aliveBuyOneReservationOrder.targetKimpRate > kimp.kimpPer
-            val isSellReservationGoalReached = aliveSellOneReservationOrder != null && aliveSellOneReservationOrder?.targetKimpRate < kimp.kimpPer
+            val isSellReservationGoalReached = aliveSellOneReservationOrder != null && aliveSellOneReservationOrder.targetKimpRate < kimp.kimpPer
             if (isBuyReservationGoalReached) {
                 if (isBuyTradePossible(kimp.upbitPrice, kimp.binancePrice, aliveBuyOneReservationOrder!!.unCompletedQuantity)) {
                     try {
