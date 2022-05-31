@@ -29,6 +29,7 @@ class UpbitCoinExchangeService(
 ) : CoinExchangeService {
     companion object {
         const val DEPOSIT_RATE = 0.9
+        const val MARKET_BUFFER = 0.99 // 시장가 매수 시 주문 수량보다 실제 체결량이 적을 수 있으므로 버퍼를 둔다.
     }
     override val coinExchangeApi = "https://api.upbit.com/v1/candles/minutes/1?market=KRW-BTC&count=1"
 
@@ -57,7 +58,7 @@ class UpbitCoinExchangeService(
     override suspend fun isSellTradePossible(unCompletedQuantity: Float): Boolean {
         val currentAccountState = getAccount()
 
-        return currentAccountState.sellAccount.balanceBTC >= unCompletedQuantity
+        return currentAccountState.sellAccount.balanceBTC >= unCompletedQuantity * MARKET_BUFFER
     }
 
     suspend fun getAccount(): UpbitAccountDTO = coroutineScope {
