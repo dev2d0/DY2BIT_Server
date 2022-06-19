@@ -9,7 +9,7 @@ data class CoinPriceDTO(
 ) {
     constructor(upbitPriceDTO: UpbitPriceDTO) : this(
         market = upbitPriceDTO.market,
-        price = upbitPriceDTO.opening_price,
+        price = upbitPriceDTO.trade_price,
     )
 
     constructor(binancePriceDTO: BinancePriceDTO) : this(
