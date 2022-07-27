@@ -15,8 +15,11 @@ import com.example.dy2bit.reservationOrder.model.form.DeleteReservationOrderForm
 import com.example.dy2bit.reservationOrder.model.form.UpdateReservationOrderForm
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import com.example.dy2bit.tracker.service.TrackerService
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.RequestBody
 
 @RestController
@@ -26,24 +29,24 @@ class ReservationOrderController(
     private val errorService: ErrorService,
     private val exchangeRateService: ExchangeRateService,
 ) {
-    @PostMapping("/api/reservationOrders/currentCoinPrices")
+    @GetMapping("/api/reservation-orders/current-coin-prices")
     suspend fun getCurrentCoinPrices(): KimpDTO {
         return exchangeRateService.getKimpPerAndRelatedCoinPrices()
     }
 
-    @PostMapping("/api/reservationOrders/getUserAccount")
+    @GetMapping("/api/reservation-orders/user-account")
     suspend fun getUserAccount(): UserAccountDTO {
         return reservationOrderService.getUserAccount()
     }
 
-    @PostMapping("/api/reservationOrders/getReservationOrderList")
+    @GetMapping("/api/reservation-orders/list")
     fun getReservationOrderList(): List<UserReservationOrderListDTO> {
         return reservationOrderService.getReservationOrderList().map {
             UserReservationOrderListDTO(it)
         }
     }
 
-    @PostMapping("/api/reservationOrders/createReservationOrder")
+    @PostMapping("/api/reservation-orders")
     suspend fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
         reservationOrderService.checkDy2bitSecretKey(createReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
@@ -55,7 +58,7 @@ class ReservationOrderController(
         )
     }
 
-    @PostMapping("/api/reservationOrders/updateReservationOrder")
+    @PutMapping("/api/reservation-orders")
     fun updateReservationOrder(@RequestBody updateReservationOrderForm: UpdateReservationOrderForm): UserReservationOrderListDTO {
         reservationOrderService.checkDy2bitSecretKey(updateReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
@@ -67,37 +70,37 @@ class ReservationOrderController(
         )
     }
 
-    @PostMapping("/api/reservationOrders/deleteReservationOrder")
+    @DeleteMapping("/api/reservation-orders")
     fun deleteReservationOrder(@RequestBody deleteReservationOrderForm: DeleteReservationOrderForm): ReservationOrder {
         reservationOrderService.checkDy2bitSecretKey(deleteReservationOrderForm.secretKey)
         return reservationOrderService.deleteReservationOrder(deleteReservationOrderForm.id)
     }
 
-    @PostMapping("/api/reservationOrders/getHistoryReservationOrderList")
+    @GetMapping("/api/reservation-orders/histories")
     fun historyReservationOrderList(): List<UserHistoryReservationOrderListDTO> {
         return reservationOrderService.getHistoryReservationOrderList().map {
             UserHistoryReservationOrderListDTO(it)
         }
     }
 
-    @PostMapping("/api/reservationOrders/deleteHistoryReservationOrder")
+    @DeleteMapping("/api/reservation-orders/histories")
     fun deleteHistoryReservationOrder(@RequestBody deleteHistoryReservationOrderForm: DeleteHistoryReservationOrderForm) {
         return reservationOrderService.deleteHistoryReservationOrder(deleteHistoryReservationOrderForm.id)
     }
 
-    @PostMapping("/api/reservationOrders/getDailyKimpList")
+    @GetMapping("/api/reservation-orders/daily-kimp-list")
     fun dailyKimpList(): List<UserDailyKimpListDTO> {
         return trackerService.getDailyKimpList().map {
             UserDailyKimpListDTO(it)
         }
     }
 
-    @PostMapping("/api/reservationOrders/getErrorReport")
+    @GetMapping("/api/reservation-orders/error-report")
     fun getErrorReport(): ErrorDTO {
         return ErrorDTO(errorService.getError())
     }
 
-    @PostMapping("/api/reservationOrders/confirmErrorReport")
+    @PostMapping("/api/reservation-orders/confirm-error-report")
     fun confirmErrorReport(): ErrorDTO {
         return errorService.confirmErrorReport()
     }
