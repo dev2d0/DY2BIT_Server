@@ -15,6 +15,7 @@ import com.example.dy2bit.reservationOrder.model.form.DeleteReservationOrderForm
 import com.example.dy2bit.reservationOrder.model.form.UpdateReservationOrderForm
 import com.example.dy2bit.reservationOrder.service.ReservationOrderService
 import com.example.dy2bit.tracker.service.TrackerService
+import com.example.dy2bit.utils.UtilService
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,6 +29,7 @@ class ReservationOrderController(
     private val trackerService: TrackerService,
     private val errorService: ErrorService,
     private val exchangeRateService: ExchangeRateService,
+    private val utilService: UtilService,
 ) {
     @GetMapping("/api/reservation-orders/current-coin-prices")
     suspend fun getCurrentCoinPrices(): KimpDTO {
@@ -48,7 +50,7 @@ class ReservationOrderController(
 
     @PostMapping("/api/reservation-orders")
     suspend fun createReservationOrder(@RequestBody createReservationOrderForm: CreateReservationOrderForm): UserReservationOrderListDTO {
-        reservationOrderService.checkDy2bitSecretKey(createReservationOrderForm.secretKey)
+        utilService.checkDy2bitSecretKey(createReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
             reservationOrderService.createReservationOrder(
                 createReservationOrderForm.targetKimpRate,
@@ -60,7 +62,7 @@ class ReservationOrderController(
 
     @PutMapping("/api/reservation-orders")
     fun updateReservationOrder(@RequestBody updateReservationOrderForm: UpdateReservationOrderForm): UserReservationOrderListDTO {
-        reservationOrderService.checkDy2bitSecretKey(updateReservationOrderForm.secretKey)
+        utilService.checkDy2bitSecretKey(updateReservationOrderForm.secretKey)
         return UserReservationOrderListDTO(
             reservationOrderService.updateReservationOrder(
                 updateReservationOrderForm.id,
@@ -72,7 +74,7 @@ class ReservationOrderController(
 
     @DeleteMapping("/api/reservation-orders")
     fun deleteReservationOrder(@RequestBody deleteReservationOrderForm: DeleteReservationOrderForm): ReservationOrder {
-        reservationOrderService.checkDy2bitSecretKey(deleteReservationOrderForm.secretKey)
+        utilService.checkDy2bitSecretKey(deleteReservationOrderForm.secretKey)
         return reservationOrderService.deleteReservationOrder(deleteReservationOrderForm.id)
     }
 
